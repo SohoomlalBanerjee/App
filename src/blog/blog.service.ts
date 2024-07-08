@@ -64,4 +64,14 @@ export class BlogService
 
     return this.blogRepository.delete(id);
   }
+
+  async findOne(id: number) 
+  {
+    const blog = await this.blogRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+    
+    return blog;
+  }
 }

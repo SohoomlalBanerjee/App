@@ -16,8 +16,10 @@ export class BlogController
     return this.blogService.create(blog,+id)
   }
 
-  @Get('findUserTodos/')
-  findAllTodosById(@Req() req) 
+  
+
+  @Get('findUserBlogs/')
+  findAllBlogsById(@Req() req) 
   {
     return this.blogService.findAllByID(req?.user?.id);
   }

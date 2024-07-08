@@ -32,10 +32,4 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   controllers: [AuthController],
   providers: [AuthService,LocalStrategy,JwtStrategy]
 })
- export class AuthModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer
-//       .apply(HashPasswordMiddleware)
-//       .forRoutes({ path: 'auth/signup', method: RequestMethod.POST });
-//   }
-}
+ export class AuthModule {}
