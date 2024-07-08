@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, Req } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
@@ -9,16 +9,17 @@ export class BlogController
 {
   constructor(private readonly blogService: BlogService) {}
 
-  @Post(':id')
-  create(@Body(ValidationPipe) blog: CreateBlogDto,@Param('id') id: number) 
+  @Post()
+  create(@Body(ValidationPipe) blog: CreateBlogDto,@Req() req) 
   {
+    const id=req.user.id;
     return this.blogService.create(blog,+id)
   }
 
-  @Get('findUserTodos/:id')
-  findAllTodosById(@Param('id') id: number) 
+  @Get('findUserTodos/')
+  findAllTodosById(@Req() req) 
   {
-    return this.blogService.findAllByID(+id);
+    return this.blogService.findAllByID(req?.user?.id);
   }
 
   @Get()
@@ -28,14 +29,14 @@ export class BlogController
   }
 
   @Patch('updateBlog/:id')
-  update(@Param('id') id: number, @Body() updateBlogDto: UpdateBlogDto) 
+  async update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto,@Req() req:any) 
   {
-    return this.blogService.update(+id, updateBlogDto);
+      return this.blogService.update(+id, updateBlogDto , req);
   }
 
   @Delete('deleteBlog/:id')
-  remove(@Param('id') id: number) 
+  remove(@Param('id') id: number,@Req() req:any) 
   {
-    return this.blogService.remove(+id);
+    return this.blogService.remove(+id,req);
   }
 }

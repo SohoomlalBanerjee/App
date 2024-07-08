@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class BlogService 
@@ -35,13 +36,32 @@ export class BlogService
     return this.blogRepository.find()
   }
 
-  update(id: number, updateBlogDto: UpdateBlogDto) 
+  async update(id: number, updateBlogDto: UpdateBlogDto, req:any) 
   {
+    console.log(req.user.id);
+    const blog = await this.blogRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+
+    if(!blog)throw new HttpException("blog not found",404);
+
+    if(blog.user.id!=req.user.id)throw new UnauthorizedException("You can only update your own blogs");
+    
     return this.blogRepository.update(id,updateBlogDto)
   }
 
-  remove(id: number) 
+ async remove(id: number, req:any) 
   {
+    const blog = await this.blogRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+
+    if(!blog)throw new HttpException("blog not found",404);
+
+    if(blog.user.id!=req.user.id)throw new UnauthorizedException("You can only delete your own blogs");
+
     return this.blogRepository.delete(id);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,7 +9,10 @@ import { Roles } from 'src/utils/roles.utils';
 @Injectable()
 export class UserService
 {
-  constructor(@InjectRepository(User) private readonly userRepository:Repository<any>){}
+  constructor(@InjectRepository(User) private readonly userRepository:Repository<any>,
+  ){}
+
+
 
   create(user: CreateUserDto) 
   {
@@ -23,9 +26,13 @@ export class UserService
     newUser.role=Roles.ROLES.NORMAL_ROLE;
 
     console.log(newUser);
-    
-
+  
     return this.userRepository.save(newUser)
+  }
+
+  getUserProfile(id:number)
+  {
+    return this.userRepository.findOneByOrFail({id})
   }
 
   findAll() 
@@ -43,17 +50,16 @@ export class UserService
     return this.userRepository.findOneByOrFail({id})
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) 
+  async update(id: number, updateUserDto: UpdateUserDto,req:any) 
   {
-    const user:any = await this.userRepository.findOneBy({id})
+    if(req.user.id!=id)throw new UnauthorizedException("You can only update your own profile")
 
-    user.username = updateUserDto.username;
-    user.email = updateUserDto.email;
-    user.password = updateUserDto.password;
-    return this.userRepository.save(user);
+    return this.userRepository.update(id,updateUserDto);
   }
 
-  remove(id: number) {
+  remove(id: number, req:any) 
+  {
+    if(req.user.id!=id)throw new UnauthorizedException("You can only delete your own profile")
     return this.userRepository.delete(id);
   }
 }
